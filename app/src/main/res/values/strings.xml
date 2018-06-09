@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">EasyCollege</string>
+    <string name="error">Not Applicable</string>
+    <string name="sat_range">Sat Range: </string>
+    <string name="acceptance_rate">Acceptance Rate: </string>
+    <string name="location">Location: </string>
+    <string name="price">Net Price: </string>
+    <string name="niche_grade_content">Niche Grade of College</string>
+    <string name="search_hint">College name</string>
+    <string name="college_dialog_title">Pick a College</string>
+</resources>

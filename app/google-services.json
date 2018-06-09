@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "896148775092",
+    "firebase_url": "https://easycollege-b0019.firebaseio.com",
+    "project_id": "easycollege-b0019",
+    "storage_bucket": "easycollege-b0019.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:896148775092:android:0cc6dce39219fa42",
+        "android_client_info": {
+          "package_name": "com.ultimi.easycollege"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "896148775092-7vbpefihuc9pukvbl5a9eal321n12qrn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ultimi.easycollege",
+            "certificate_hash": "a034a72a914b7b67de956a96491ddfa144ae9189"
+          }
+        },
+        {
+          "client_id": "896148775092-djoun9ci0cfoiv5h4dkot59r0uugv0lp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAul3lM1JI1sUHj_3RY91YpENLYOSSSeFA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "896148775092-djoun9ci0cfoiv5h4dkot59r0uugv0lp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
