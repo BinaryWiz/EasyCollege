@@ -7,6 +7,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +21,8 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
@@ -27,18 +30,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
 
+    final String MYPREFS = "MyPrefs";
     RecyclerView mRecyclerView;
     CollegeAdapter mAdapter;
     ArrayList<CollegeModel> mCollegeModels;
     ArrayList<String> mFoundColleges;
     String mChosenCollege;
     ProgressDialog mProgressDialog;
+    SharedPreferences mSharedPreferences;
+    ArrayList<CollegeModel> mNewCollegeModels;
 
 
     @Override
@@ -48,16 +55,22 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView = findViewById(R.id.colleges_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setHasFixedSize(true);
+        mCollegeModels = new ArrayList<>();
+
+        mAdapter = new CollegeAdapter(this, mCollegeModels);
+        mRecyclerView.setAdapter(mAdapter);
         Log.d("EasyCollege", "From onCreate()");
 
         mFoundColleges = new ArrayList<>();
         mChosenCollege = "";
 
-
+        mSharedPreferences = getSharedPreferences(MYPREFS, Context.MODE_PRIVATE);
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Gathering Data");
         mProgressDialog.setIndeterminate(false);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+
+        loadData();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -160,11 +173,47 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public void loadData() {
+        Log.d("EasyCollege", "from loadData");
+        Gson gson = new Gson();
+        String json = mSharedPreferences.getString("college models", null);
+        if(json == null){
+            return;
+        }
+        Type type = new TypeToken<ArrayList<CollegeModel>>() {}.getType();
+        mNewCollegeModels = gson.fromJson(json, type);
+        Log.d("EasyCollege", mNewCollegeModels.toString());
+        for (CollegeModel model : mNewCollegeModels){
+            mCollegeModels.add(model);
+            mAdapter.notifyDataSetChanged();
+        }
+
+    }
+
     @Override
     public void onStart() {
         super.onStart();
-        mCollegeModels = new ArrayList<>();
-        mAdapter = new CollegeAdapter(this, mCollegeModels);
-        mRecyclerView.setAdapter(mAdapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("EasyCollege", "ondestroy");
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(mCollegeModels);
+        if(mSharedPreferences.contains("college models")) {
+            Log.d("EasyCollege", "destroyedddd");
+            editor.remove("college models");
+            editor.apply();
+        }
+        editor.putString("college models", json);
+        editor.apply();
     }
 }

@@ -47,6 +47,8 @@ public class CollegeAdapter extends RecyclerView.Adapter<CollegeAdapter.CollegeV
         return mCollegeModels.size();
     }
 
+
+
     class CollegeViewHolder extends RecyclerView.ViewHolder {
 
         TextView mGrade;
