@@ -47,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences mSharedPreferences;
     ArrayList<CollegeModel> mNewCollegeModels;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,23 +78,30 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu, menu);
+        try {
+            getMenuInflater().inflate(R.menu.menu, menu);
 
-        // Associate searchable configuration with the SearchView
-        MenuItem searchItem = menu.findItem(R.id.search_button);
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+            // Associate searchable configuration with the SearchView
+            MenuItem searchItem = menu.findItem(R.id.search_button);
+            SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
 
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        ComponentName componentName = new ComponentName(this, MainActivity.class);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName));
-        searchView.setIconified(true);
-        searchView.setSubmitButtonEnabled(true);
-        return true;
+            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            ComponentName componentName = new ComponentName(this, MainActivity.class);
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName));
+            searchView.setIconified(true);
+            searchView.setSubmitButtonEnabled(true);
+            return true;
+        }
+        catch(NullPointerException e){
+            Log.d("EasyCollege", "NullPointerException in onCreateOptionsMenu from getSearchableInfo: " + e.toString());
+        }
+
+        return false;
     }
 
-    public void createCollegeDialog(Bundle savedInstanceState) {
+    public void createCollegeDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        ArrayAdapter arrayAdapter = new ArrayAdapter<String>(
+        ArrayAdapter arrayAdapter = new ArrayAdapter<>(
                 MainActivity.this,
                 android.R.layout.select_dialog_item,
                 mFoundColleges
@@ -122,6 +128,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void loadData() {
+        Log.d("EasyCollege", "from loadData");
+        Gson gson = new Gson();
+        String json = mSharedPreferences.getString("college models", null);
+        if(json == null){
+            return;
+        }
+        Type type = new TypeToken<ArrayList<CollegeModel>>() {}.getType();
+        mNewCollegeModels = gson.fromJson(json, type);
+        Log.d("EasyCollege", mNewCollegeModels.toString());
+        for (CollegeModel model : mNewCollegeModels){
+            mCollegeModels.add(model);
+            mAdapter.notifyDataSetChanged();
+        }
+
+    }
+
     public void searchCollegeOptions(String query) {
         mProgressDialog.show();
         AsyncHttpClient client = new AsyncHttpClient();
@@ -136,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                        mFoundColleges.add(colleges.getString(i));
                    }
                    mProgressDialog.dismiss();
-                   createCollegeDialog(null);
+                   createCollegeDialog();
 
                }
                catch(JSONException e) {
@@ -173,43 +196,13 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void loadData() {
-        Log.d("EasyCollege", "from loadData");
-        Gson gson = new Gson();
-        String json = mSharedPreferences.getString("college models", null);
-        if(json == null){
-            return;
-        }
-        Type type = new TypeToken<ArrayList<CollegeModel>>() {}.getType();
-        mNewCollegeModels = gson.fromJson(json, type);
-        Log.d("EasyCollege", mNewCollegeModels.toString());
-        for (CollegeModel model : mNewCollegeModels){
-            mCollegeModels.add(model);
-            mAdapter.notifyDataSetChanged();
-        }
-
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-    }
-
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d("EasyCollege", "ondestroy");
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(mCollegeModels);
         if(mSharedPreferences.contains("college models")) {
-            Log.d("EasyCollege", "destroyedddd");
             editor.remove("college models");
             editor.apply();
         }
