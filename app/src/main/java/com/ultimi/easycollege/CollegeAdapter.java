@@ -40,14 +40,13 @@ public class CollegeAdapter extends RecyclerView.Adapter<CollegeAdapter.CollegeV
         holder.mAcceptanceRate.setText(college.getAcceptanceRate());
         holder.mLocation.setText(college.getLocation());
         holder.mPrice.setText(college.getPrice());
+        holder.mActRange.setText(college.getActRange());
     }
 
     @Override
     public int getItemCount() {
         return mCollegeModels.size();
     }
-
-
 
     class CollegeViewHolder extends RecyclerView.ViewHolder {
 
@@ -57,6 +56,7 @@ public class CollegeAdapter extends RecyclerView.Adapter<CollegeAdapter.CollegeV
         TextView mAcceptanceRate;
         TextView mLocation;
         TextView mPrice;
+        TextView mActRange;
 
         public CollegeViewHolder(View itemView) {
             super(itemView);
@@ -67,6 +67,8 @@ public class CollegeAdapter extends RecyclerView.Adapter<CollegeAdapter.CollegeV
             mAcceptanceRate = itemView.findViewById(R.id.college_acceptance_rate);
             mLocation = itemView.findViewById(R.id.college_location);
             mPrice = itemView.findViewById(R.id.college_price);
+            mActRange = itemView.findViewById(R.id.college_act_range);
+
         }
     }
 }

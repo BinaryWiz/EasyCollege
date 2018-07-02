@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Canvas;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +16,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -69,11 +71,38 @@ public class MainActivity extends AppCompatActivity {
         mProgressDialog.setIndeterminate(false);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
+
+        ItemTouchHelper mIth = new ItemTouchHelper(
+                new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.RIGHT) {
+                    @Override
+                    public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                        mAdapter.notifyItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                        return true;
+                    }
+
+                    @Override
+                    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                        mCollegeModels.remove(viewHolder.getAdapterPosition());
+                        mAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
+                    }
+
+                    @Override
+                    public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                        if(actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                            float alpha = 1 - (Math.abs(dX) / recyclerView.getWidth());
+                            viewHolder.itemView.setAlpha(alpha);
+                        }
+                        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                    }
+                }
+        );
+
+        mIth.attachToRecyclerView(mRecyclerView);
+
         loadData();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
     }
 
     @Override
@@ -154,6 +183,7 @@ public class MainActivity extends AppCompatActivity {
                try {
                    mFoundColleges.clear();
                    JSONArray colleges = response.getJSONArray("messages");
+                   Log.d("EasyCollege", colleges.toString());
                    for(int i = 0; i < colleges.length(); i++) {
                        Log.d("EasyCollege", colleges.getString(i));
                        mFoundColleges.add(colleges.getString(i));
@@ -182,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("EasyCollege", (String) data.get("Name"));
                     mCollegeModels.add(new CollegeModel((String) data.get("Name"), (String) data.get("Niche_Grade"),
                             (String) data.get("Sat_Range"), (String) data.get("Acceptance_Rate"),
-                            (String) data.get("Location"), (String) data.get("Net_Price")));
+                            (String) data.get("Location"), (String) data.get("Net_Price"), (String) data.get("Act_Range")));
                     mAdapter.notifyDataSetChanged();
                     mProgressDialog.dismiss();
 
@@ -197,8 +227,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(mCollegeModels);

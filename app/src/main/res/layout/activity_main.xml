@@ -24,7 +24,6 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/colleges_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="16dp" />
+        android:layout_height="match_parent" />
 
 </LinearLayout>

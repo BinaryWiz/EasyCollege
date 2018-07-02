@@ -8,14 +8,16 @@ public class CollegeModel {
     private String mAcceptanceRate;
     private String mLocation;
     private String mPrice;
+    private String mActRange;
 
-    public CollegeModel(String collegeName, String nicheGrade, String satRange, String acceptanceRate, String location, String price) {
+    public CollegeModel(String collegeName, String nicheGrade, String satRange, String acceptanceRate, String location, String price, String actRange) {
         mCollegeName = collegeName;
         mGrade = nicheGrade;
         mSatRange = satRange;
         mAcceptanceRate = acceptanceRate;
         mLocation = location;
         mPrice = price;
+        mActRange = actRange;
     }
 
     public String getCollegeName() {
@@ -40,5 +42,9 @@ public class CollegeModel {
 
     public String getPrice() {
         return mPrice;
+    }
+
+    public String getActRange() {
+        return mActRange;
     }
 }
