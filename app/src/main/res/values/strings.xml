@@ -8,4 +8,5 @@
     <string name="niche_grade_content">Niche Grade of College</string>
     <string name="search_hint">College name</string>
     <string name="college_dialog_title">Pick a College</string>
+    <string name="title_activity_searchable">SearchableActivity</string>
 </resources>
