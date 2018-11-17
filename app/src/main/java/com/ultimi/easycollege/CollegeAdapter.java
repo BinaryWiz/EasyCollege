@@ -27,12 +27,11 @@ public class CollegeAdapter extends RecyclerView.Adapter<CollegeAdapter.CollegeV
         View view = inflater.inflate(R.layout.colleges_view, null);
         CollegeViewHolder holder = new CollegeViewHolder(view);
         return holder;
-
     }
 
     @Override
     public void onBindViewHolder(@NonNull CollegeViewHolder holder, int position) {
-
+        // Sets the information of the actual card
         CollegeModel college = mCollegeModels.get(position);
         holder.mGrade.setText(college.getNicheGrade());
         holder.mCollegeName.setText(college.getCollegeName());
@@ -49,7 +48,7 @@ public class CollegeAdapter extends RecyclerView.Adapter<CollegeAdapter.CollegeV
     }
 
     class CollegeViewHolder extends RecyclerView.ViewHolder {
-
+        // Gets the different components of each card
         TextView mGrade;
         TextView mCollegeName;
         TextView mSatRange;
@@ -61,6 +60,7 @@ public class CollegeAdapter extends RecyclerView.Adapter<CollegeAdapter.CollegeV
         public CollegeViewHolder(View itemView) {
             super(itemView);
 
+            // Sets each  component of card to the variable
             mGrade = itemView.findViewById(R.id.grade);
             mCollegeName = itemView.findViewById(R.id.college_name);
             mSatRange = itemView.findViewById(R.id.college_range);

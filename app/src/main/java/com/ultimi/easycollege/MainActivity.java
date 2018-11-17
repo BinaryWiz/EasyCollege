@@ -38,7 +38,9 @@ import java.util.ArrayList;
 import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
-
+    // Some general terms:
+    // Viewholder: essentially each seperate "card" in the recyclerView
+    // What controls the move
     final String MYPREFS = "MyPrefs";
     RecyclerView mRecyclerView;
     CollegeAdapter mAdapter;
@@ -52,9 +54,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        mRecyclerView = findViewById(R.id.colleges_recycler_view);
+        setContentView(R.layout.activity_main); // Sets the view to the main activity
+        mRecyclerView = findViewById(R.id.colleges_recycler_view); // Gets the recycler view
+
+        // Layout manager for  Recycler View
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // Will not change physical size of the recycler view (will scroll instead)
         mRecyclerView.setHasFixedSize(true);
         mCollegeModels = new ArrayList<>();
 
@@ -62,30 +68,46 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mAdapter);
         Log.d("EasyCollege", "From onCreate()");
 
+        // ArrayList for the colleges found from getCollegeOptions
         mFoundColleges = new ArrayList<>();
+
+        // College that user chooses from prompt
         mChosenCollege = "";
 
+        // Defines the sharedPreferences for when the app enters the onPause stage and is
+        // eventually destroyed, so data is preserved
         mSharedPreferences = getSharedPreferences(MYPREFS, Context.MODE_PRIVATE);
+
+        // Defines progress dialog for the getCollegeOptions and getCollegeData
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Gathering Data");
+
+        // Makes it clear that we don't know how long it will take the progress dialog to finish
         mProgressDialog.setIndeterminate(false);
+
+        // Sets the progress dialog to be a spinner
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
 
         ItemTouchHelper mIth = new ItemTouchHelper(
                 new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.RIGHT) {
                     @Override
+
+                    // Notifies the viewHolder that the position of it changed
                     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
                         mAdapter.notifyItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
                         return true;
                     }
 
+                    // Notifies the viewHolder that it has been swiped and removes it
+                    // Removes it from mCollegeModels as well
                     @Override
                     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                         mCollegeModels.remove(viewHolder.getAdapterPosition());
                         mAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
                     }
 
+                    // Gives the animation when getting swiped
                     @Override
                     public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
                         if(actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
@@ -97,10 +119,13 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
+        // Attaches ItemTouchHandler to the RecyclerView
         mIth.attachToRecyclerView(mRecyclerView);
 
+        // Loads data from the json file that is in the sharedPreferences
         loadData();
 
+        // Sets the top toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
     }
@@ -108,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         try {
+            // Inflates the menu with the menu I created
             getMenuInflater().inflate(R.menu.menu, menu);
 
             // Associate searchable configuration with the SearchView
@@ -116,7 +142,11 @@ public class MainActivity extends AppCompatActivity {
 
             SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
             ComponentName componentName = new ComponentName(this, MainActivity.class);
+
+            // Associates the searchView with the searchManager
             searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName));
+
+            // Sets the searchView to have an icon and have a submit button
             searchView.setIconified(true);
             searchView.setSubmitButtonEnabled(true);
             return true;
@@ -129,13 +159,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void createCollegeDialog() {
+        // Creates the dialog that has the college options
+
+        // Builds the AlertDialog and and the ArrayAdapter
+        // Just inserts the values of the ArrayList (mFoundColleges) into the AlertDialog
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         ArrayAdapter arrayAdapter = new ArrayAdapter<>(
                 MainActivity.this,
                 android.R.layout.select_dialog_item,
                 mFoundColleges
-
         );
+
+        // Gets the college that the user clicked on and sets it to mChosenCollege
+        // Used in the getCollegeInformation method
         builder.setTitle(R.string.college_dialog_title).setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -145,11 +181,14 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        // Shows the AlertDialog
         builder.create().show();
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
+        // After searching for a college, sends the query to the searchCollegeOptions method
         setIntent(intent);
         if(Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
@@ -158,12 +197,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadData() {
+        // Loads the data from the Gson/json which has the college models in it
         Log.d("EasyCollege", "from loadData");
         Gson gson = new Gson();
         String json = mSharedPreferences.getString("college models", null);
         if(json == null){
             return;
         }
+
+        // Essentially each college model is stored in a Type
         Type type = new TypeToken<ArrayList<CollegeModel>>() {}.getType();
         mNewCollegeModels = gson.fromJson(json, type);
         Log.d("EasyCollege", mNewCollegeModels.toString());
@@ -175,6 +217,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void searchCollegeOptions(String query) {
+        // Gets the college options by sending an AsyncHttp request to AWS Lambda function
+        // Via the AWS Gateway link
         mProgressDialog.show();
         AsyncHttpClient client = new AsyncHttpClient();
         client.get("https://mvk5rtvch8.execute-api.us-east-1.amazonaws.com/prod/search?search=" + query, null, new JsonHttpResponseHandler() {
@@ -189,6 +233,8 @@ public class MainActivity extends AppCompatActivity {
                        mFoundColleges.add(colleges.getString(i));
                    }
                    mProgressDialog.dismiss();
+
+                   // Displays the AlertDialog of colleges
                    createCollegeDialog();
 
                }
@@ -202,17 +248,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getCollegeInformation() {
+        // Gets the college information for the selected college from AWS Lambda
+        // Via AWS Gateway link
         mProgressDialog.show();
         AsyncHttpClient client = new AsyncHttpClient();
         client.get("https://1m468rdcpi.execute-api.us-east-1.amazonaws.com/prod/search?search=" + mChosenCollege, null, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response){
                 try {
+                    // Gets each individual piece of information from json
                     JSONObject data = response.getJSONObject("message");
-                    Log.d("EasyCollege", (String) data.get("Name"));
-                    mCollegeModels.add(new CollegeModel((String) data.get("Name"), (String) data.get("Niche_Grade"),
-                            (String) data.get("Sat_Range"), (String) data.get("Acceptance_Rate"),
-                            (String) data.get("Location"), (String) data.get("Net_Price"), (String) data.get("Act_Range")));
+                    mCollegeModels.add(new CollegeModel(
+                            // Parses the JSON
+                            data.getString("Name"),
+                            data.getString("Niche_Grade"),
+                            data.getString("Sat_Range"),
+                            data.getString("Acceptance_Rate"),
+                            data.getString("Location"),
+                            data.getString("Net_Price"),
+                            data.getString("Act_Range")));
                     mAdapter.notifyDataSetChanged();
                     mProgressDialog.dismiss();
 
@@ -228,6 +282,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
+        // Puts the college models inside of the mSharedPreferences via a Gson
         super.onPause();
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         Gson gson = new Gson();

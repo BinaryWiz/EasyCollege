@@ -1,7 +1,7 @@
 package com.ultimi.easycollege;
 
 public class CollegeModel {
-
+    // Stores college information for Adapater
     private String mCollegeName;
     private String mGrade;
     private String mSatRange;
