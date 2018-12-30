@@ -50,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
     ProgressDialog mProgressDialog;
     SharedPreferences mSharedPreferences;
     ArrayList<CollegeModel> mNewCollegeModels;
+    final int TIMEOUT = 20 * 1000;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -222,7 +224,6 @@ public class MainActivity extends AppCompatActivity {
     public void searchCollegeOptions(String query) {
         // Gets the college options by sending an AsyncHttp request to AWS Lambda function
         // Via the AWS Gateway link
-        final int TIMEOUT = 20 * 1000;
         mProgressDialog.show();
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(TIMEOUT);
@@ -266,6 +267,7 @@ public class MainActivity extends AppCompatActivity {
         // Via AWS Gateway link
         mProgressDialog.show();
         AsyncHttpClient client = new AsyncHttpClient();
+        client.setTimeout(TIMEOUT);
         client.get("https://1m468rdcpi.execute-api.us-east-1.amazonaws.com/prod/search?search=" + mChosenCollege, null, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response){
@@ -304,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        // Puts the college models inside of the mSharedPreferences via a Gson
+        // Puts the college models inside of the mSharedPreferences via a GSON
         super.onPause();
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         Gson gson = new Gson();
@@ -313,6 +315,7 @@ public class MainActivity extends AppCompatActivity {
             editor.remove("college models");
             editor.apply();
         }
+        // gets the information from the json named "college models"
         editor.putString("college models", json);
         editor.apply();
     }
