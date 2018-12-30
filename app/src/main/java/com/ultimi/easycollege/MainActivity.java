@@ -88,6 +88,9 @@ public class MainActivity extends AppCompatActivity {
         // Sets the progress dialog to be a spinner
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
+        // Won't dismiss dialog if user touches outside of area
+        mProgressDialog.setCanceledOnTouchOutside(false);
+
 
         ItemTouchHelper mIth = new ItemTouchHelper(
                 new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.RIGHT) {
@@ -219,8 +222,11 @@ public class MainActivity extends AppCompatActivity {
     public void searchCollegeOptions(String query) {
         // Gets the college options by sending an AsyncHttp request to AWS Lambda function
         // Via the AWS Gateway link
+        final int TIMEOUT = 20 * 1000;
         mProgressDialog.show();
         AsyncHttpClient client = new AsyncHttpClient();
+        client.setTimeout(TIMEOUT);
+        Log.d("EasyCollege", "https://mvk5rtvch8.execute-api.us-east-1.amazonaws.com/prod/search?search=" + query);
         client.get("https://mvk5rtvch8.execute-api.us-east-1.amazonaws.com/prod/search?search=" + query, null, new JsonHttpResponseHandler() {
            @Override
            public void onSuccess(int statusCode, Header[] headers, JSONObject response){
@@ -232,18 +238,26 @@ public class MainActivity extends AppCompatActivity {
                        Log.d("EasyCollege", colleges.getString(i));
                        mFoundColleges.add(colleges.getString(i));
                    }
-                   mProgressDialog.dismiss();
 
                    // Displays the AlertDialog of colleges
                    createCollegeDialog();
 
                }
                catch(JSONException e) {
-                   mProgressDialog.dismiss();
-                   Log.d("EasyCollege", e.toString());
+                   Log.d("EasyCollege", e.toString() + " (From JSONException in onSuccess in searchCollegeOptions)");
                    Toast.makeText(MainActivity.this, "Couldn't gather data", Toast.LENGTH_LONG).show();
                }
+               finally {
+                   mProgressDialog.dismiss();
+               }
            }
+            // If the request fails
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+                mProgressDialog.dismiss();
+                Toast.makeText(MainActivity.this, "Couldn't gather data", Toast.LENGTH_LONG).show();
+            }
         });
     }
 
@@ -268,14 +282,22 @@ public class MainActivity extends AppCompatActivity {
                             data.getString("Net_Price"),
                             data.getString("Act_Range")));
                     mAdapter.notifyDataSetChanged();
-                    mProgressDialog.dismiss();
-
                 }
                 catch(JSONException e) {
-                    mProgressDialog.dismiss();
                     Log.d("EasyCollege", e.toString());
                     Toast.makeText(MainActivity.this, "Couldn't gather data", Toast.LENGTH_LONG).show();
                 }
+                finally {
+                    mProgressDialog.dismiss();
+                }
+            }
+
+            // If the request fails
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+                mProgressDialog.dismiss();
+                Toast.makeText(MainActivity.this, "Couldn't gather data", Toast.LENGTH_LONG).show();
             }
         });
     }
