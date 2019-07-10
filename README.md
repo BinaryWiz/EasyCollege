@@ -16,3 +16,5 @@ SAT and ACT ranges, and the acceptance rate of the college
 [getCollegeInformation](https://github.com/BinaryWiz/GetCollegeInformation)
 
 * The actual application is pretty much a ScrollView of the the Card objects that contain the college information
+
+![Android Application](http://timeless-apps.com/img/easy_college_screenshot.png)
