@@ -17,4 +17,4 @@ SAT and ACT ranges, and the acceptance rate of the college
 
 * The actual application is pretty much a ScrollView of the the Card objects that contain the college information
 
-<img alt="Easy College Application" src="http://timeless-apps.com/img/easy_college_screenshot.png" width="350" style="align-self: center;">
+<img alt="Easy College Application" src="http://timeless-apps.com/img/easy_college_screenshot.png" width="300" style="align-self: center;">
