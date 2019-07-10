@@ -16,5 +16,6 @@ SAT and ACT ranges, and the acceptance rate of the college
 [getCollegeInformation](https://github.com/BinaryWiz/GetCollegeInformation)
 
 * The actual application is pretty much a ScrollView of the the Card objects that contain the college information
-
-<img alt="Easy College Application" src="http://timeless-apps.com/img/easy_college_screenshot.png" width="300" align="center">
+<p align="center">
+  <img alt="Easy College Application" src="http://timeless-apps.com/img/easy_college_screenshot.png" width="300">
+</p>
